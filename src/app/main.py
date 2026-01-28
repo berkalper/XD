@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 from app.application.use_cases import PatientService
+from app.config import get_data_path
 from app.infrastructure.json_repository import JsonPatientRepository
 from app.interface.cli import CliApp
 
 
 def main() -> None:
-    repository = JsonPatientRepository(Path("data/patients.json"))
+    repository = JsonPatientRepository(get_data_path())
     service = PatientService(repository)
     app = CliApp(service)
     app.run()
