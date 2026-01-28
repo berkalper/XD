@@ -10,3 +10,11 @@ def get_data_path() -> Path:
     else:
         base_dir = Path.cwd()
     return base_dir / "data" / "patients.json"
+
+
+def get_credentials_path() -> Path:
+    if getattr(sys, "frozen", False):
+        base_dir = Path(sys.executable).resolve().parent
+    else:
+        base_dir = Path.cwd()
+    return base_dir / "data" / "credentials.json"

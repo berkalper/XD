@@ -3,6 +3,12 @@
 Bu proje doktor ve sekreter için basit bir hasta kayıt sistemi sunar. Temiz mimariyi takip eden
 küçük bir komut satırı (CLI) ve masaüstü (Tkinter GUI) uygulamasıdır.
 
+## Gereksinimler
+
+- Python 3.10+
+- Tkinter (Python ile birlikte gelir)
+- Windows için `.exe` üretimi: PyInstaller
+
 ## Çalıştırma
 
 CLI:
@@ -18,7 +24,8 @@ PYTHONPATH=src python -m app.gui_main
 ```
 
 Uygulama hasta kayıtlarını `data/patients.json` dosyasında saklar. Kayıtlarda yaş, cinsiyet,
-muayene notları ve randevular tutulur.
+muayene notları ve randevular tutulur. İlk açılışta giriş ekranında kullanıcı adı ve şifre
+oluşturulur; sonraki girişlerde aynı bilgilerle oturum açılır.
 
 ## Tek Tıkla Açılabilir .exe (Windows)
 
