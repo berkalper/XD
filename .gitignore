@@ -3,6 +3,3 @@ __pycache__/
 .env
 .venv/
 data/patients.json
-build/
-dist/
-*.spec
