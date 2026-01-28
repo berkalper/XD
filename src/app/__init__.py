@@ -1,0 +1,1 @@
+"""Hasta kayıt sistemi paketi."""
