@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Iterable
 
-from app.domain.entities import Patient, Visit
+from app.domain.entities import Appointment, Patient, Visit
 from app.domain.repositories import PatientRepository
 
 
@@ -51,9 +51,18 @@ class JsonPatientRepository(PatientRepository):
             "patient_id": patient.patient_id,
             "full_name": patient.full_name,
             "phone": patient.phone,
+            "age": patient.age,
+            "gender": patient.gender,
             "visits": [
                 {"note": visit.note, "created_at": visit.created_at.isoformat()}
                 for visit in patient.visits
+            ],
+            "appointments": [
+                {
+                    "scheduled_at": appointment.scheduled_at.isoformat(),
+                    "note": appointment.note,
+                }
+                for appointment in patient.appointments
             ],
         }
 
@@ -63,9 +72,19 @@ class JsonPatientRepository(PatientRepository):
             Visit(note=item["note"], created_at=datetime.fromisoformat(item["created_at"]))
             for item in payload.get("visits", [])
         ]
+        appointments = [
+            Appointment(
+                scheduled_at=datetime.fromisoformat(item["scheduled_at"]),
+                note=item["note"],
+            )
+            for item in payload.get("appointments", [])
+        ]
         return Patient(
             patient_id=payload["patient_id"],
             full_name=payload["full_name"],
             phone=payload["phone"],
+            age=payload.get("age", 0),
+            gender=payload.get("gender", "Belirtilmedi"),
             visits=visits,
+            appointments=appointments,
         )

@@ -17,7 +17,8 @@ GUI:
 PYTHONPATH=src python -m app.gui_main
 ```
 
-Uygulama hasta kayıtlarını `data/patients.json` dosyasında saklar.
+Uygulama hasta kayıtlarını `data/patients.json` dosyasında saklar. Kayıtlarda yaş, cinsiyet,
+muayene notları ve randevular tutulur.
 
 ## Tek Tıkla Açılabilir .exe (Windows)
 

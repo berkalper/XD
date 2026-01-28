@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Callable
 
 from app.application.use_cases import (
     AddVisitRequest,
     PatientService,
     RegisterPatientRequest,
+    ScheduleAppointmentRequest,
 )
 
 
@@ -24,6 +26,9 @@ class CliApp:
             MenuItem("1", "Sekreter: Hasta kaydı oluştur", self._register_patient),
             MenuItem("2", "Doktor: Hasta listesi", self._list_patients),
             MenuItem("3", "Doktor: Muayene notu ekle", self._add_visit),
+            MenuItem("4", "Doktor: Muayene notlarını görüntüle", self._show_visits),
+            MenuItem("5", "Sekreter: Randevu oluştur", self._schedule_appointment),
+            MenuItem("6", "Doktor: Randevu listesini görüntüle", self._show_appointments),
             MenuItem("0", "Çıkış", self._exit),
         ]
         self._running = True
@@ -46,12 +51,19 @@ class CliApp:
         patient_id = input("Hasta numarası: ").strip()
         full_name = input("Ad Soyad: ").strip()
         phone = input("Telefon: ").strip()
+        age = input("Yaş: ").strip()
+        gender = input("Cinsiyet: ").strip()
+        if not age.isdigit():
+            print("Hata: Yaş sayısal olmalı.")
+            return
         try:
             patient = self._service.register_patient(
                 RegisterPatientRequest(
                     patient_id=patient_id,
                     full_name=full_name,
                     phone=phone,
+                    age=int(age),
+                    gender=gender or "Belirtilmedi",
                 )
             )
         except ValueError as exc:
@@ -68,7 +80,8 @@ class CliApp:
         for patient in patients:
             print(
                 f"- {patient.patient_id} | {patient.full_name} | {patient.phone} | "
-                f"Muayene: {len(patient.visits)}"
+                f"Yaş: {patient.age} | Cinsiyet: {patient.gender} | "
+                f"Muayene: {len(patient.visits)} | Randevu: {len(patient.appointments)}"
             )
 
     def _add_visit(self) -> None:
@@ -81,6 +94,60 @@ class CliApp:
             print(f"Hata: {exc}")
             return
         print(f"Not eklendi. Toplam muayene: {len(patient.visits)}")
+
+    def _show_visits(self) -> None:
+        print("\nMuayene Notları")
+        patient_id = input("Hasta numarası: ").strip()
+        patient = self._service.list_patients()
+        selected = next((item for item in patient if item.patient_id == patient_id), None)
+        if selected is None:
+            print("Hasta bulunamadı.")
+            return
+        if not selected.visits:
+            print("Muayene notu bulunamadı.")
+            return
+        for visit in selected.visits:
+            timestamp = visit.created_at.strftime("%Y-%m-%d %H:%M")
+            print(f"- [{timestamp}] {visit.note}")
+
+    def _schedule_appointment(self) -> None:
+        print("\nRandevu Oluştur")
+        patient_id = input("Hasta numarası: ").strip()
+        scheduled_at = input("Tarih Saat (YYYY-AA-GG SS:DD): ").strip()
+        note = input("Not (opsiyonel): ").strip()
+        try:
+            scheduled_dt = datetime.strptime(scheduled_at, "%Y-%m-%d %H:%M")
+        except ValueError:
+            print("Hata: Tarih formatı geçersiz.")
+            return
+        try:
+            patient = self._service.schedule_appointment(
+                ScheduleAppointmentRequest(
+                    patient_id=patient_id,
+                    scheduled_at=scheduled_dt,
+                    note=note,
+                )
+            )
+        except ValueError as exc:
+            print(f"Hata: {exc}")
+            return
+        print(f"Randevu eklendi. Toplam randevu: {len(patient.appointments)}")
+
+    def _show_appointments(self) -> None:
+        print("\nRandevu Listesi")
+        patient_id = input("Hasta numarası: ").strip()
+        patient = self._service.list_patients()
+        selected = next((item for item in patient if item.patient_id == patient_id), None)
+        if selected is None:
+            print("Hasta bulunamadı.")
+            return
+        if not selected.appointments:
+            print("Randevu bulunamadı.")
+            return
+        for appointment in sorted(selected.appointments, key=lambda item: item.scheduled_at):
+            timestamp = appointment.scheduled_at.strftime("%Y-%m-%d %H:%M")
+            note = appointment.note or "-"
+            print(f"- [{timestamp}] {note}")
 
     def _exit(self) -> None:
         print("Çıkılıyor...")

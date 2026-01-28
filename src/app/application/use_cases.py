@@ -13,11 +13,20 @@ class RegisterPatientRequest:
     patient_id: str
     full_name: str
     phone: str
+    age: int
+    gender: str
 
 
 @dataclass
 class AddVisitRequest:
     patient_id: str
+    note: str
+
+
+@dataclass
+class ScheduleAppointmentRequest:
+    patient_id: str
+    scheduled_at: datetime
     note: str
 
 
@@ -33,6 +42,8 @@ class PatientService:
             patient_id=request.patient_id,
             full_name=request.full_name,
             phone=request.phone,
+            age=request.age,
+            gender=request.gender,
         )
         self._repository.add(patient)
         return patient
@@ -45,5 +56,13 @@ class PatientService:
         if patient is None:
             raise ValueError("Hasta bulunamadı.")
         patient.add_visit(note=request.note, created_at=datetime.utcnow())
+        self._repository.save(patient)
+        return patient
+
+    def schedule_appointment(self, request: ScheduleAppointmentRequest) -> Patient:
+        patient = self._repository.get(request.patient_id)
+        if patient is None:
+            raise ValueError("Hasta bulunamadı.")
+        patient.add_appointment(scheduled_at=request.scheduled_at, note=request.note)
         self._repository.save(patient)
         return patient
