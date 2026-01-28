@@ -1,0 +1,17 @@
+from __future__ import annotations
+
+from app.application.use_cases import PatientService
+from app.config import get_data_path
+from app.infrastructure.json_repository import JsonPatientRepository
+from app.interface.cli import CliApp
+
+
+def main() -> None:
+    repository = JsonPatientRepository(get_data_path())
+    service = PatientService(repository)
+    app = CliApp(service)
+    app.run()
+
+
+if __name__ == "__main__":
+    main()
